@@ -1,6 +1,7 @@
-package com.iollshh.forum.domain.repository;
+package com.iollshh.forum.domain.repository.decorator.concrete;
 
 import com.iollshh.forum.domain.entity.*;
+import com.iollshh.forum.domain.repository.decorator.ArticleLikeRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -8,10 +9,11 @@ import javax.persistence.*;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ArticleLikeRepositoryImpl implements CustomArticleLikeRepository{
+public class ArticleLikeRepositoryImpl implements ArticleLikeRepositoryCustom {
 
+    @PersistenceContext
+    private EntityManager em;
     private final JPAQueryFactory queryFactory;
-    private final EntityManagerFactory emf;
 
     @Override
     public ArticleLike saveByLikeInform(Member member, Article article){

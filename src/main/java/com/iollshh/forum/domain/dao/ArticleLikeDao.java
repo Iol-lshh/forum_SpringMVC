@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +25,8 @@ import java.util.stream.Collectors;
 @Component
 public class ArticleLikeDao {
 
-    private final EntityManagerFactory emf;
-
+    @PersistenceContext
+    private EntityManager em;
     private final ArticleLikeRepository articleLikeRepository;
     private final MemberRepository memberRepository;
     private final ArticleRepository articleRepository;
@@ -35,7 +36,6 @@ public class ArticleLikeDao {
     @Transactional
     public ArticleLikeDto createLike(String memberAccountId, Long articleId) throws Exception {
 
-        EntityManager em = emf.createEntityManager();
         EntityTransaction tr = em.getTransaction();
 
         ArticleLike newArticleLike;
@@ -87,7 +87,6 @@ public class ArticleLikeDao {
     public ListDto getListByArticleId(Long articleId) throws Exception {
         ListDto listDto = null;
 
-        EntityManager em = emf.createEntityManager();
         EntityTransaction tr = em.getTransaction();
         try {
             tr.begin();

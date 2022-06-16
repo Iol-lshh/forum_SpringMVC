@@ -1,23 +1,26 @@
-package com.iollshh.forum.domain.repository;
+package com.iollshh.forum.domain.repository.decorator.concrete;
 
 import com.iollshh.forum.domain.dto.ArticleDto;
 import com.iollshh.forum.domain.entity.Article;
 import com.iollshh.forum.domain.entity.Member;
 import com.iollshh.forum.domain.entity.QArticle;
+import com.iollshh.forum.domain.repository.decorator.ArticleRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ArticleRepositoryImpl implements CustomArticleRepository{
+public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
+
+    @PersistenceContext
+    private EntityManager em;
     private final JPAQueryFactory queryFactory;
-    private final EntityManagerFactory emf;
 
     @Override
     public Article saveByMemberAndDto(Member member, ArticleDto articleDto) {
@@ -30,7 +33,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .likeCount(0)
                 .build();
 
-        EntityManager em = emf.createEntityManager();
         EntityTransaction tr = em.getTransaction();
 
         return newArticle;

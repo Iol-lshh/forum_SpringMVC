@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,8 @@ import java.util.stream.Collectors;
 @Component
 public class ArticleDao {
 
-    private final EntityManagerFactory emf;
+    @PersistenceContext
+    private EntityManager em;
     private final ArticleRepository articleRepository;
     private final MemberRepository memberRepository;
 
@@ -32,7 +34,6 @@ public class ArticleDao {
     @Transactional
     public ArticleDto uploadNewArticle(ArticleDto articleDto) throws Exception {
 
-        EntityManager em = emf.createEntityManager();
         EntityTransaction tr = em.getTransaction();
 
         Article newArticle;
@@ -73,7 +74,6 @@ public class ArticleDao {
     @Transactional
     public ListDto getArticleList(int startIdx, int count, String memberAccountId) throws Exception {
 
-        EntityManager em = emf.createEntityManager();
         EntityTransaction tr = em.getTransaction();
 
         ListDto listDto;

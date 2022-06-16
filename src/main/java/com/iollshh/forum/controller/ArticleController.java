@@ -118,7 +118,7 @@ public class ArticleController {
     }
 
     //수정
-    @PostMapping("/up/{memberAccountId}")
+    @PutMapping("/{memberAccountId}")
     public ResponseEntity<Result> updateArticle(@RequestBody ArticleDto article, @PathVariable String memberAccountId) {
 
         Result result = articleService.updateArticle(article, memberAccountId);

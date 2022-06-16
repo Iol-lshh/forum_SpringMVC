@@ -1,13 +1,12 @@
-package com.iollshh.forum.domain.repository;
+package com.iollshh.forum.domain.repository.decorator;
 
 import com.iollshh.forum.domain.dto.ArticleDto;
 import com.iollshh.forum.domain.entity.Article;
 import com.iollshh.forum.domain.entity.Member;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
-public interface CustomArticleRepository {
+public interface ArticleRepositoryCustom {
     //save new Article
     Article saveByMemberAndDto(Member member, ArticleDto articleDto);
 

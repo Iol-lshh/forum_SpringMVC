@@ -1,4 +1,4 @@
-package com.iollshh.forum.domain.repository;
+package com.iollshh.forum.domain.repository.decorator;
 
 import com.iollshh.forum.domain.entity.Article;
 import com.iollshh.forum.domain.entity.ArticleLike;
@@ -6,7 +6,7 @@ import com.iollshh.forum.domain.entity.Member;
 
 import java.util.List;
 
-public interface CustomArticleLikeRepository {
+public interface ArticleLikeRepositoryCustom {
 
     ArticleLike saveByLikeInform(Member member, Article article);
 

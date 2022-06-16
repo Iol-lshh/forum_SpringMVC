@@ -1,17 +1,17 @@
-package com.iollshh.forum.domain.repository;
+package com.iollshh.forum.domain.repository.decorator.concrete;
 
 import com.iollshh.forum.domain.dto.MemberDto;
 import com.iollshh.forum.domain.entity.Member;
 import com.iollshh.forum.domain.entity.QMember;
+import com.iollshh.forum.domain.repository.decorator.MemberRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class MemberRepositoryImpl implements CustomMemberRepository{
-
+public class MemberRepositoryImpl implements MemberRepositoryCustom {
+    //
     private final JPAQueryFactory queryFactory;
 
-    //
     @Override
     public Member findOneByAccountId(String accountId) {
         QMember qMember = new QMember("M");

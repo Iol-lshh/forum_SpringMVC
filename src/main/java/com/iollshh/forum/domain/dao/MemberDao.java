@@ -11,19 +11,19 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 @RequiredArgsConstructor
 @Component
 public class MemberDao {
-    private final EntityManagerFactory emf;
-
+    @PersistenceContext
+    private EntityManager em;
     private final MemberRepository memberRepository;
     private final MemberFactory memberFactory;
 
     @Transactional
     public MemberDto uploadNewMember(MemberDto memberDto) throws Exception{
-        EntityManager em = emf.createEntityManager();
         EntityTransaction tr = em.getTransaction();
 
         Member newMember;

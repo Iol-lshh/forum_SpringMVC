@@ -17,7 +17,7 @@ public class ArticleLikeController {
     // => 토글보단 컨트롤러단 분리가 나은 듯 하다.. 
     // => 분리시, 이미 존재 여부에 대해, 유효성 검증이 필요 없다!
     // => articleid와 memberAccountId 에 대해, unique이기 때문
-    @GetMapping("/{articleId}/{memberAccountId}")
+    @PutMapping("/{articleId}/{memberAccountId}")
     public ResponseEntity<Result> createLike(@PathVariable("memberAccountId") String memberAccountId, @PathVariable("articleId") String articleId) {
 
         Result result;
