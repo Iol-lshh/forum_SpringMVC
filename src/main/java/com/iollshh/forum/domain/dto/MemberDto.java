@@ -2,7 +2,6 @@ package com.iollshh.forum.domain.dto;
 
 import lombok.*;
 
-@RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
 @Data

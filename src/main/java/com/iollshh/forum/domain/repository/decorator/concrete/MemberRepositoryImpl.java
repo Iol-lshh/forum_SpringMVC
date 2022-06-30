@@ -7,13 +7,18 @@ import com.iollshh.forum.domain.repository.decorator.MemberRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepositoryCustom {
     //
     private final JPAQueryFactory queryFactory;
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
-    public Member findOneByAccountId(String accountId) {
+    public Member getReferenceByAccountId(String accountId) {
         QMember qMember = new QMember("M");
 
         Member member = queryFactory.selectFrom(qMember)
@@ -26,12 +31,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     @Override
     public Member saveNewByDto(MemberDto memberDto) {
+
         Member newMember = Member.builder()
                 .nickname(memberDto.getNickname())
                 .accountType(memberDto.getAccountType())
                 .accountId(memberDto.getAccountId())
                 .quit("0")
                 .build();
+
+        em.persist(newMember);
+
         return newMember;
     }
 }

@@ -1,109 +1,118 @@
 package com.iollshh.forum.service;
 
-import com.iollshh.forum.domain.dao.ArticleDao;
 import com.iollshh.forum.domain.dto.ArticleDto;
+import com.iollshh.forum.domain.dto.Dto;
 import com.iollshh.forum.domain.dto.ListDto;
-import com.iollshh.forum.domain.dto.Result;
+import com.iollshh.forum.domain.entity.Article;
+import com.iollshh.forum.domain.entity.Member;
+import com.iollshh.forum.domain.factory.ArticleFactory;
+import com.iollshh.forum.domain.repository.ArticleRepository;
+import com.iollshh.forum.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceContext;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class ArticleService{
+    private final ArticleFactory articleFactory;
+    private final ArticleRepository articleRepository;
+    private final MemberRepository memberRepository;
 
-    private final ArticleDao articleDao;
+    @PersistenceContext
+    EntityManager em;
 
     //신규 생성
-    public Result uploadNewArticle(ArticleDto articleDto){
-        Result result = new Result();
-
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
+    public ArticleDto uploadNewArticle(ArticleDto requestDto) throws Exception{
         //시간
         Date regdate = new Date();
-        articleDto.setRegdate(regdate);
-        articleDto.setLastUpdate(regdate);
-        try{
-            articleDto = articleDao.uploadNewArticle(articleDto);
+        requestDto.setRegdate(regdate);
+        requestDto.setLastUpdate(regdate);
 
-            result.setResultData(articleDto);
-            result.setProcessResult("success");
-        }catch(Exception e){
-            result.setProcessResult("fail");
-            result.setResultDetail(result.getResultDetail()+e);
+        Article newArticle;
+
+        Member member = memberRepository.getReferenceByAccountId(requestDto.getWriterId());
+        if (member == null) {
+            throw new Exception("member is null");
         }
-        return result;
+        articleRepository.saveByArticleDto(requestDto);
+
+        return articleFactory.makeDtoByEntity(articleRepository.getReferenceById(requestDto.getArticleId()));
     }
 
     //단 건
     //회원의 좋아요 포함
-    public Result getArticle(Long articleId, String memberAccountId) {
-        Result result = new Result();
-        try {
-            ArticleDto articleDto = articleDao.getArticle(articleId, memberAccountId);
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public ArticleDto getArticle(Long articleId, String memberAccountId) throws Exception {
 
-            result.setResultData(articleDto);
-            result.setProcessResult("success");
-        }catch (NullPointerException e) {
-            result.setProcessResult("null");
-            result.setResultDetail("데이터가 없습니다."+e);
-        }catch(Exception e){
-            result.setProcessResult("fail");
-            result.setResultDetail(result.getResultDetail()+e);
-        }
-        return result;
+        Article article = articleRepository.getReferenceById(articleId);
+        ArticleDto resultDto = articleFactory.makeDtoByEntity(article, memberAccountId);
+
+        return resultDto;
     }
 
     //복수
     //회원의 좋아요 포함
-    public Result getArticleList(int startIdx, int count, String memberAccountId) {
-        Result result = new Result();
-        try {
-            ListDto listDto = articleDao.getArticleList(startIdx, count, memberAccountId);
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public ListDto getArticleList(int startIdx, int count, String memberAccountId) throws Exception {
 
-            result.setResultData(listDto);
-            result.setProcessResult("success");
-        }catch (NullPointerException e) {
-            result.setProcessResult("null");
-            result.setResultDetail("데이터가 없습니다."+e);
-        }catch(Exception e){
-            result.setProcessResult("fail");
-            result.setResultDetail(result.getResultDetail()+e);
-        }
-        return result;
+        ListDto listDto;
+
+        List<Article> articleList = articleRepository.findListByPagination(startIdx, count);
+        List<Dto> list = articleList.stream()
+                .map(e -> articleFactory.makeDtoByEntity(e, memberAccountId))
+                .collect(Collectors.toList());
+        listDto = new ListDto(list);
+
+        return listDto;
     }
 
     //삭제
     //좋아요 확인하여 같이 삭제
-    public Result deleteArticle(Long articleId, String memberAccountId) {
-        Result result = new Result();
-        try {
-            ArticleDto articleDto = articleDao.deleteArticle(articleId, memberAccountId);
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
+    public String deleteArticle(Long articleId, String memberAccountId) throws Exception{
 
-            result.setResultData(articleDto);
-            result.setProcessResult("success");
-        }catch(Exception e){
-            result.setProcessResult("fail");
-            result.setResultDetail(result.getResultDetail()+e);
+        Article article = articleRepository.getReferenceById(articleId);
+
+        if(
+                article.getId() == null
+                || !article.getMember().getAccountId().equals(memberAccountId)
+        ){
+            return "fail";
         }
-        return result;
+        articleRepository.deleteById(articleId);
+
+        return "success";
     }
 
     //수정
-    public Result updateArticle(ArticleDto articleDto, String memeberAccountId) {
-        Result result = new Result();
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
+    public String updateArticle(ArticleDto articleDto, String memberAccountId) throws Exception{
         //시간
         Date regdate = new Date();
         articleDto.setLastUpdate(regdate);
-        try {
-            ArticleDto res = articleDao.updateArticle(articleDto, memeberAccountId);
 
-            result.setResultData(res);
-            result.setProcessResult("success");
-        }catch(Exception e){
-            result.setProcessResult("fail");
-            result.setResultDetail(result.getResultDetail()+e);
+        //유효성 검사
+        Member member = memberRepository.getReferenceByAccountId(memberAccountId);
+        String validMemberId = articleRepository.getReferenceById(articleDto.getArticleId()).getMember().getAccountId();
+        if( 
+                member.getAccountId().isEmpty() //회원 검증
+                && !member.getAccountId().equals(validMemberId) //글 작성자 검증
+        ){
+            return "fail";
         }
-        return result;
+        String result = articleRepository.saveByArticleDto(articleDto);
+
+        return "success";
     }
 }

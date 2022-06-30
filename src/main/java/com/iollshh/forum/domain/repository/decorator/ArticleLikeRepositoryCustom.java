@@ -10,7 +10,7 @@ public interface ArticleLikeRepositoryCustom {
 
     ArticleLike saveByLikeInform(Member member, Article article);
 
-    Long deleteByLikeInform(String memberAccountId, Long articleId);
+    String deleteByLikeInform(String memberAccountId, Long articleId);
 
     List<ArticleLike> findListByArticleId(Long parsedArticleId);
 

@@ -8,15 +8,11 @@ import java.util.List;
 
 public interface ArticleRepositoryCustom {
     //save new Article
-    Article saveByMemberAndDto(Member member, ArticleDto articleDto);
-
-    Article findOneByArticleId(Long articleId);
+    String saveByArticleDto(ArticleDto articleDto);
 
     List<Article> findListByPagination(int startIdx, int count);
 
-    Article deleteByArticleId(Long articleId);
-
-    Article updateByArticle(Member member, ArticleDto articleDto);
+    String deleteByArticleId(Long articleId);
 
     Long updateLikeCnt(String option, Long articleId) throws Exception;
 

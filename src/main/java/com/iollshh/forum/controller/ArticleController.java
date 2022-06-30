@@ -15,52 +15,52 @@ public class ArticleController {
 
     //신규 글 등록
     @PostMapping("/new")
-    public ResponseEntity<Result> uploadNewArticle(@RequestBody ArticleDto article) {
+    public ResponseEntity<ResultDto> uploadNewArticle(@RequestBody ArticleDto article) {
 
-        Result result = articleService.uploadNewArticle(article);
-
-        //todo AOP
-        if (result.getProcessResult().equals("success")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(200));
-        } else if (result.getProcessResult().equals("fail")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(203));
-        } else {
-            return new ResponseEntity<Result>(HttpStatus.valueOf(204));
+        ResultDto result;
+        try{
+            result = ResultDto.builder()
+                    .processResult("success")
+                    .resultData(articleService.uploadNewArticle(article))
+                    .build();
+        }catch (Exception e){
+            result = ResultDto.builder().processResult("fail").resultDetail(e.getMessage()).build();
         }
+
+        return new ResponseEntity<ResultDto>(result, HttpStatus.OK);
     }
 
     //단 건 가져오기
     @GetMapping("/view/{articleId}/{memberAccountId}")
-    public ResponseEntity<Result> getArticle(@PathVariable String articleId, @PathVariable String memberAccountId) {
+    public ResponseEntity<ResultDto> getArticle(@PathVariable String articleId, @PathVariable String memberAccountId) {
 
-        Result result;
+        ResultDto result;
         Long parsedArticleId;
 
         if (!(articleId.isEmpty())
                 && articleId.matches("[0-9]*")) {
             parsedArticleId = Long.parseLong(articleId);
-            result = articleService.getArticle(parsedArticleId, memberAccountId);
+
+            try{
+                result = ResultDto.builder()
+                        .processResult("success")
+                        .resultData(articleService.getArticle(parsedArticleId, memberAccountId))
+                        .build();
+            }catch(Exception e){
+                result = ResultDto.builder().processResult("fail").resultDetail(e.getMessage()).build();
+            }
         } else {
-            result = Result.builder().processResult("fail").resultDetail("잘못된 데이터 형식").build();
+            result = ResultDto.builder().processResult("fail").resultDetail("잘못된 데이터 형식").build();
         }
 
-        //todo AOP
-        if (result.getProcessResult().equals("success")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(200));
-        } else if (result.getProcessResult().equals("null")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(204));
-        } else if (result.getProcessResult().equals("fail")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(203));
-        } else {
-            return new ResponseEntity<Result>(HttpStatus.valueOf(420));
-        }
+        return new ResponseEntity<ResultDto>(result, HttpStatus.OK);
     }
 
     //리스트 가져오기(페이징)
     @GetMapping("/list/{startIdx}/{count}/{memberAccountId}")
-    public ResponseEntity<Result> getArticleList(@PathVariable("startIdx") String startIdx, @PathVariable("count") String count, @PathVariable String memberAccountId) {
+    public ResponseEntity<ResultDto> getArticleList(@PathVariable("startIdx") String startIdx, @PathVariable("count") String count, @PathVariable String memberAccountId) {
 
-        Result result;
+        ResultDto result;
         int parsedStartIdx;
         int parsedCount;
 
@@ -72,64 +72,63 @@ public class ArticleController {
             parsedStartIdx = Integer.parseInt(startIdx);
             parsedCount = Integer.parseInt(count);
 
-            result = articleService.getArticleList(parsedStartIdx, parsedCount, memberAccountId);
+            try{
+                result = ResultDto.builder()
+                        .processResult("success")
+                        .resultData(articleService.getArticleList(parsedStartIdx, parsedCount, memberAccountId))
+                        .build();
+            }catch (Exception e){
+                result = ResultDto.builder().processResult("fail").resultDetail(e.getMessage()).build();
+            }
         } else {
-            result = Result.builder().processResult("fail").resultDetail("잘못된 데이터 형식").build();
+            result = ResultDto.builder().processResult("fail").resultDetail("잘못된 데이터 형식").build();
         }
 
-        //todo AOP
-        if (result.getProcessResult().equals("success")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(200));
-        } else if (result.getProcessResult().equals("null")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(204));
-        } else if (result.getProcessResult().equals("fail")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(203));
-        } else {
-            return new ResponseEntity<Result>(HttpStatus.valueOf(420));
-        }
+        return new ResponseEntity<ResultDto>(result, HttpStatus.OK);
     }
 
     //삭제
     @DeleteMapping("/{articleId}/{memberAccountId}")
-    public ResponseEntity<Result> deleteArticle(@PathVariable("articleId") String articleId, @PathVariable("memberAccountId") String memberAccountId) {
-
-        Result result;
+    public ResponseEntity<ResultDto> deleteArticle(@PathVariable("articleId") String articleId, @PathVariable("memberAccountId") String memberAccountId) {
+        ResultDto result;
         Long parsedArticleId;
 
         if (!(articleId.isEmpty())
                 && articleId.matches("[0-9]*")) {
             parsedArticleId = Long.parseLong(articleId);
-            result = articleService.deleteArticle(parsedArticleId, memberAccountId);
+
+            try{
+                String res = articleService.deleteArticle(parsedArticleId, memberAccountId);
+                result = ResultDto.builder()
+                        .processResult("success")
+                        .resultDetail(res)
+                        .build();
+            }catch (Exception e){
+                result = ResultDto.builder().processResult("fail").resultDetail(e.getMessage()).build();
+            }
         } else {
-            result = Result.builder().processResult("fail").resultDetail("잘못된 데이터 형식").build();
+            result = ResultDto.builder().processResult("fail").resultDetail("잘못된 데이터 형식").build();
         }
 
-
-        //todo AOP
-        if (result.getProcessResult().equals("success")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(200));
-        } else if (result.getProcessResult().equals("null")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(204));
-        } else if (result.getProcessResult().equals("fail")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(203));
-        } else {
-            return new ResponseEntity<Result>(HttpStatus.valueOf(420));
-        }
+        return new ResponseEntity<ResultDto>(result, HttpStatus.OK);
     }
 
     //수정
     @PutMapping("/{memberAccountId}")
-    public ResponseEntity<Result> updateArticle(@RequestBody ArticleDto article, @PathVariable String memberAccountId) {
+    public ResponseEntity<ResultDto> updateArticle(@RequestBody ArticleDto article, @PathVariable String memberAccountId) {
+        ResultDto result;
 
-        Result result = articleService.updateArticle(article, memberAccountId);
+        try{
+            String res = articleService.updateArticle(article, memberAccountId);
 
-        //todo AOP
-        if (result.getProcessResult().equals("success")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(200));
-        } else if (result.getProcessResult().equals("fail")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(203));
-        } else {
-            return new ResponseEntity<Result>(HttpStatus.valueOf(204));
+            result = ResultDto.builder()
+                    .processResult("success")
+                    .resultDetail(res)
+                    .build();
+        }catch (Exception e){
+            result = ResultDto.builder().processResult("fail").resultDetail(e.getMessage()).build();
         }
+
+        return new ResponseEntity<ResultDto>(result, HttpStatus.OK);
     }
 }

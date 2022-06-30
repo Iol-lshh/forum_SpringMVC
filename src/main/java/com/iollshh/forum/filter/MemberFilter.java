@@ -20,7 +20,8 @@ public class MemberFilter implements Filter {
 
         //1. filter write request
         if(httpUri.matches(".*/new")
-                ||httpUri.matches(".*/up")
+                ||httpMethod.equals("POST")
+                ||httpMethod.equals("PUT")
                 ||httpMethod.equals("DELETE")) {
             if (!(authorization.isEmpty())) {
 
@@ -29,8 +30,9 @@ public class MemberFilter implements Filter {
                 String accountType = authorizationArr[0];
 
                 //3. accountType 확인
-                List<String> accountTypeKind = new ArrayList<>(Arrays.asList(""));
-                if(accountTypeKind.stream().filter(e->e.equals(accountType)).count() > 0) {
+                List<String> accountTypeList = new ArrayList<>(Arrays.asList("MEMBER", "CUSTOMER"));
+                long res = accountTypeList.stream().filter(e->e.equals(accountType)).count();
+                if(res>0) {
                     chain.doFilter(request, response);
                 }
             }

@@ -4,6 +4,8 @@ import com.iollshh.forum.domain.dto.ArticleDto;
 import com.iollshh.forum.domain.entity.Article;
 import com.iollshh.forum.domain.entity.Member;
 import com.iollshh.forum.domain.entity.QArticle;
+import com.iollshh.forum.domain.entity.QMember;
+import com.iollshh.forum.domain.repository.ArticleRepository;
 import com.iollshh.forum.domain.repository.decorator.ArticleRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -23,31 +25,41 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Article saveByMemberAndDto(Member member, ArticleDto articleDto) {
-        Article newArticle = Article.builder()
-                .member(member)
-                .title(articleDto.getTitle())
-                .content(articleDto.getContent())
-                .regdate(articleDto.getRegdate())
-                .lastUpdate(articleDto.getRegdate())
-                .likeCount(0)
-                .build();
+    public String saveByArticleDto(ArticleDto articleDto) {
 
-        EntityTransaction tr = em.getTransaction();
+        Article resultArticle;
 
-        return newArticle;
-    }
+        //switch insert/update
+        if(articleDto.getArticleId()==null) {//insert
+            QMember qMember = new QMember("writer");
 
-    @Override
-    public Article findOneByArticleId(Long articleId) {
-        QArticle article1 =  new QArticle("article1");
+            Member member = queryFactory.selectFrom(qMember)
+                    .where(qMember.accountId.eq(articleDto.getWriterId())
+                            .and(qMember.quit.ne("1")))
+                    .fetchOne();
 
-        Article article = queryFactory.selectFrom(article1)
-                .where(article1.id.eq(articleId)
-                        .and(article1.deldate.isNull())
-                )
-                .fetchOne();
-        return article;
+            resultArticle = Article.builder()
+                    .member(member)
+                    .title(articleDto.getTitle())
+                    .content(articleDto.getContent())
+                    .regdate(articleDto.getRegdate())
+                    .lastUpdate(articleDto.getRegdate())
+                    .likeCount(0)
+                    .build();
+
+            em.persist(resultArticle);
+            em.flush();
+            return resultArticle.getId().toString();
+        }else{ //update
+            resultArticle = Article.builder()
+                    .id(articleDto.getArticleId())
+                    .title(articleDto.getTitle())
+                    .content(articleDto.getContent())
+                    .lastUpdate(articleDto.getLastUpdate())
+                    .build();
+            em.merge(resultArticle);
+            return "success";
+        }
     }
 
     @Override
@@ -59,11 +71,12 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .offset(startIdx)
                 .limit(count)
                 .fetch();
+
         return articleList;
     }
 
     @Override
-    public Article deleteByArticleId(Long articleId) {
+    public String deleteByArticleId(Long articleId) {
         //시간
         Date regdate = new Date();
         QArticle article1 = new QArticle("article1");
@@ -73,55 +86,28 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .where(article1.id.eq(articleId))
                 .execute();
 
-        Article article = queryFactory.selectFrom(article1)
-                .where(article1.id.eq(articleId))
-                .fetchOne();
-
-        return article;
-    }
-
-    @Override
-    @Transactional
-    public Article updateByArticle(Member member, ArticleDto articleDto) {
-        //시간
-        Date regdate = new Date();
-        QArticle article1 = new QArticle("article1");
-
-        queryFactory.update(article1)
-                .set(article1.title, articleDto.getTitle())
-                .set(article1.content, articleDto.getContent())
-                .set(article1.lastUpdate, articleDto.getLastUpdate())
-                .where(article1.id.eq(articleDto.getArticleId())
-                        .and(article1.deldate.isNull()))
-                .execute();
-
-        Article article = queryFactory.selectFrom(article1)
-                .where(article1.id.eq(articleDto.getArticleId())
-                        .and(article1.deldate.isNull())
-                )
-                .fetchOne();
-
-        return article;
+        return "success";
     }
 
     @Override
     public Long updateLikeCnt(String option, Long articleId) throws Exception {
-        long res = 0;
+        long res;
         QArticle article1 = new QArticle("article1");
-        Integer before = queryFactory.select(article1.likeCount)
+        Integer _before = queryFactory.select(article1.likeCount)
                 .from(article1)
                 .where(article1.id.eq(articleId))
                 .fetchOne();
+        int before = _before==null?0:_before;
         switch (option) {
             case "+":
                 res = queryFactory.update(article1)
-                        .set(article1.likeCount, before+1)
+                        .set(article1.likeCount, before + 1)
                         .where(article1.id.eq(articleId))
                         .execute();
                 break;
             case "-":
                 res = queryFactory.update(article1)
-                        .set(article1.likeCount, before-1)
+                        .set(article1.likeCount, before -1)
                         .where(article1.id.eq(articleId))
                         .execute();
                 break;

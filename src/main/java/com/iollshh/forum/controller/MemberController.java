@@ -1,7 +1,7 @@
 package com.iollshh.forum.controller;
 
 import com.iollshh.forum.domain.dto.MemberDto;
-import com.iollshh.forum.domain.dto.Result;
+import com.iollshh.forum.domain.dto.ResultDto;
 import com.iollshh.forum.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,17 +19,22 @@ public class MemberController {
 
     //회원정보 동기화를 위한 REST API 인터페이스
     @PostMapping("/new")
-    public ResponseEntity<Result> setNewMember(@RequestBody MemberDto member){
-        Result result = memberService.setNewMember(member);
+    public ResponseEntity<ResultDto> setNewMember(@RequestBody MemberDto member){
+        ResultDto result;
 
-        //todo AOP
-        if (result.getProcessResult().equals("success")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(200));
-        } else if (result.getProcessResult().equals("fail")) {
-            return new ResponseEntity<Result>(result, HttpStatus.valueOf(203));
-        } else {
-            return new ResponseEntity<Result>(HttpStatus.valueOf(204));
+        try {
+            result = ResultDto.builder()
+                                .processResult("success")
+                                .resultData(memberService.setNewMember(member))
+                                .build();
+        } catch (Exception e) {
+            result = ResultDto.builder()
+                    .processResult("fail")
+                    .resultDetail(e.getMessage())
+                    .build();
         }
+
+        return new ResponseEntity<ResultDto>(result, HttpStatus.OK);
     }
 
     //회원 탈퇴 처리

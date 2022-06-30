@@ -6,7 +6,7 @@ import com.iollshh.forum.domain.entity.Member;
 public interface MemberRepositoryCustom {
 
     //search Member by accountId
-    Member findOneByAccountId(String AccountId);
+    Member getReferenceByAccountId(String AccountId);
 
     Member saveNewByDto(MemberDto memberDto);
 }
