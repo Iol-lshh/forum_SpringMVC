@@ -38,8 +38,6 @@ public class ArticleLikeService implements BusinessLogic{
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public String createLike(String memberAccountId, Long articleId) throws Exception{
 
-        ArticleLike newArticleLike;
-
         if(articleLikeRepository.existsByInform(memberAccountId, articleId)){
             return "이미 좋아합니다.";
         }

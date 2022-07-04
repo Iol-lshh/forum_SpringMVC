@@ -2,28 +2,31 @@ package com.iollshh.forum.service;
 
 import com.iollshh.forum.domain.dto.MemberDto;
 import com.iollshh.forum.domain.entity.Member;
+import com.iollshh.forum.domain.factory.MemberFactory;
 import com.iollshh.forum.domain.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
-    @MockBean
+    @Mock
     private MemberRepository memberRepository;
-
-    @Autowired
+    @Spy
+    private MemberFactory memberFactory;
+    @InjectMocks
     private MemberService memberService;
 
+
     @Test
-    @Transactional
-    void setNewMember() throws Exception {
+    void setNewMemberSuccess() throws Exception {
         //test case
         MemberDto memberDto = MemberDto.builder()
                 .accountId("tester2")
@@ -47,7 +50,7 @@ class MemberServiceTest {
     }
 
     @Test
-    void findMember() throws Exception {
+    void findMemberSuccess() throws Exception {
         //test case
         String accountId = "tester";
 
