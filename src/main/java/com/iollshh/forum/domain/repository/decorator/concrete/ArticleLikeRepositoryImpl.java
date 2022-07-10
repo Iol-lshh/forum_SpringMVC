@@ -28,65 +28,15 @@ public class ArticleLikeRepositoryImpl implements ArticleLikeRepositoryCustom {
     }
 
     @Override
-    public String deleteByLikeInform(String memberAccountId, Long articleId) {
-        QArticleLike qArticleLike = new QArticleLike("qArticle");
-
-        Long targetId = queryFactory.select(qArticleLike.id)
-                .from(qArticleLike)
-                .where(qArticleLike.member.accountId.eq(memberAccountId))
-                .where(qArticleLike.article.id.eq(articleId))
-                .fetchOne();
-
-        queryFactory.delete(qArticleLike)
-                .where(qArticleLike.id.eq(targetId))
-                .execute();
-
-        return "success";
-    }
-
-    @Override
-    public List<ArticleLike> findListByArticleId(Long parsedArticleId) {
+    public List<ArticleLike> getListByArticleId(Long articleId) {
         QArticleLike qArticle =  new QArticleLike("qArticle");
 
         List<ArticleLike> articleLikeList = queryFactory.selectFrom(qArticle)
-                .where(qArticle.article.id.eq(parsedArticleId))
+                .where(qArticle.article.id.eq(articleId))
                 .where(qArticle.article.deldate.isNull())    //삭제된 글 제외
                 .fetch();
 
         return articleLikeList;
-    }
-
-    @Override
-    public Long deleteByMemberAccountId(String memberAccountId) {
-        QArticleLike qArticle = new QArticleLike("qArticle");
-
-        Long result = queryFactory.delete(qArticle)
-                .where(qArticle.member.accountId.eq(memberAccountId))
-                .execute();
-
-        return result;
-    }
-
-    @Override
-    public Long deleteByArticleId(Long articleId) {
-        QArticleLike qArticle = new QArticleLike("qArticle");
-
-        Long result = queryFactory.delete(qArticle)
-                .where(qArticle.article.id.eq(articleId))
-                .execute();
-
-        return result;
-    }
-
-    @Override
-    public ArticleLike findOneByInform(String memberAccountId, Long articleId){
-        QArticleLike qArticle = new QArticleLike("qArticle");
-
-        ArticleLike articleLike = queryFactory.selectFrom(qArticle)
-                .where(qArticle.member.accountId.eq(memberAccountId))
-                .where(qArticle.article.id.eq(articleId))
-                .fetchOne();
-        return articleLike;
     }
 
     @Override
@@ -98,6 +48,19 @@ public class ArticleLikeRepositoryImpl implements ArticleLikeRepositoryCustom {
                 .where(qArticle.member.accountId.eq(memberAccountId))
                 .where(qArticle.article.id.eq(articleId))
                 .fetchOne() != null;
+
+        return res;
+    }
+
+    @Override
+    public ArticleLike getByInform(String memberAccountId, Long articleId){
+        QArticleLike qArticleLike = new QArticleLike("qArticleLike");
+
+        ArticleLike res = queryFactory.select(qArticleLike)
+                .from(qArticleLike)
+                .where(qArticleLike.member.accountId.eq(memberAccountId))
+                .where(qArticleLike.article.id.eq(articleId))
+                .fetchOne();
 
         return res;
     }

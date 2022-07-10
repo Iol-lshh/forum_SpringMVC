@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import java.util.Date;
 import java.util.List;
@@ -39,15 +38,12 @@ public class ArticleService{
         requestDto.setRegdate(regdate);
         requestDto.setLastUpdate(regdate);
 
-        Article newArticle;
-
         Member member = memberRepository.getReferenceByAccountId(requestDto.getWriterId());
         if (member == null) {
             throw new Exception("member is null");
         }
-        articleRepository.saveByArticleDto(requestDto);
 
-        return articleFactory.makeDtoByEntity(articleRepository.getReferenceById(requestDto.getArticleId()));
+        return articleFactory.makeDtoByEntity(articleRepository.saveNewByArticleDto(requestDto));
     }
 
     //단 건
@@ -68,7 +64,7 @@ public class ArticleService{
 
         ListDto listDto;
 
-        List<Article> articleList = articleRepository.findListByPagination(startIdx, count);
+        List<Article> articleList = articleRepository.getListByPagination(startIdx, count);
         List<Dto> list = articleList.stream()
                 .map(e -> articleFactory.makeDtoByEntity(e, memberAccountId))
                 .collect(Collectors.toList());
@@ -90,7 +86,7 @@ public class ArticleService{
         ){
             return "fail";
         }
-        articleRepository.deleteById(articleId);
+        articleRepository.deleteSoft(article);
 
         return "success";
     }
@@ -98,20 +94,20 @@ public class ArticleService{
     //수정
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public String updateArticle(ArticleDto articleDto, String memberAccountId) throws Exception{
-        //시간
-        Date regdate = new Date();
-        articleDto.setLastUpdate(regdate);
-
         //유효성 검사
         Member member = memberRepository.getReferenceByAccountId(memberAccountId);
-        String validMemberId = articleRepository.getReferenceById(articleDto.getArticleId()).getMember().getAccountId();
+        Article article = articleRepository.getReferenceById(articleDto.getArticleId());
         if( 
                 member.getAccountId().isEmpty() //회원 검증
-                && !member.getAccountId().equals(validMemberId) //글 작성자 검증
+                && !member.getAccountId().equals(article.getMember().getAccountId()) //글 작성자 검증
         ){
             return "fail";
         }
-        String result = articleRepository.saveByArticleDto(articleDto);
+
+        article.setTitle(articleDto.getTitle());
+        article.setContent(articleDto.getContent());
+        article.setLastUpdate(new Date());
+        articleRepository.save(article);
 
         return "success";
     }

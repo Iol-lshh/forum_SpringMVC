@@ -25,45 +25,34 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public String saveByArticleDto(ArticleDto articleDto) {
+    public Article saveNewByArticleDto(ArticleDto articleDto) {
 
         Article resultArticle;
 
         //switch insert/update
-        if(articleDto.getArticleId()==null) {//insert
-            QMember qMember = new QMember("writer");
+        QMember qMember = new QMember("writer");
 
-            Member member = queryFactory.selectFrom(qMember)
-                    .where(qMember.accountId.eq(articleDto.getWriterId())
-                            .and(qMember.quit.ne("1")))
-                    .fetchOne();
+        Member member = queryFactory.selectFrom(qMember)
+                .where(qMember.accountId.eq(articleDto.getWriterId())
+                        .and(qMember.quit.ne("1")))
+                .fetchOne();
 
-            resultArticle = Article.builder()
-                    .member(member)
-                    .title(articleDto.getTitle())
-                    .content(articleDto.getContent())
-                    .regdate(articleDto.getRegdate())
-                    .lastUpdate(articleDto.getRegdate())
-                    .likeCount(0)
-                    .build();
+        resultArticle = Article.builder()
+                .member(member)
+                .title(articleDto.getTitle())
+                .content(articleDto.getContent())
+                .regdate(articleDto.getRegdate())
+                .lastUpdate(articleDto.getRegdate())
+                .likeCount(0)
+                .build();
 
-            em.persist(resultArticle);
-            em.flush();
-            return resultArticle.getId().toString();
-        }else{ //update
-            resultArticle = Article.builder()
-                    .id(articleDto.getArticleId())
-                    .title(articleDto.getTitle())
-                    .content(articleDto.getContent())
-                    .lastUpdate(articleDto.getLastUpdate())
-                    .build();
-            em.merge(resultArticle);
-            return "success";
-        }
+        em.persist(resultArticle);
+        em.flush();
+        return resultArticle;
     }
 
     @Override
-    public List<Article> findListByPagination(int startIdx, int count) {
+    public List<Article> getListByPagination(int startIdx, int count) {
         QArticle article1 =  new QArticle("article1");
 
         List<Article> articleList = queryFactory.selectFrom(article1)
@@ -76,44 +65,13 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     }
 
     @Override
-    public String deleteByArticleId(Long articleId) {
+    public String deleteSoft(Article article) {
         //시간
         Date regdate = new Date();
-        QArticle article1 = new QArticle("article1");
-
-        queryFactory.update(article1)
-                .set(article1.deldate, regdate)
-                .where(article1.id.eq(articleId))
-                .execute();
+        article.setDeldate(regdate);
+        em.merge(article);
+        em.flush();
 
         return "success";
-    }
-
-    @Override
-    public Long updateLikeCnt(String option, Long articleId) throws Exception {
-        long res;
-        QArticle article1 = new QArticle("article1");
-        Integer _before = queryFactory.select(article1.likeCount)
-                .from(article1)
-                .where(article1.id.eq(articleId))
-                .fetchOne();
-        int before = _before==null?0:_before;
-        switch (option) {
-            case "+":
-                res = queryFactory.update(article1)
-                        .set(article1.likeCount, before + 1)
-                        .where(article1.id.eq(articleId))
-                        .execute();
-                break;
-            case "-":
-                res = queryFactory.update(article1)
-                        .set(article1.likeCount, before -1)
-                        .where(article1.id.eq(articleId))
-                        .execute();
-                break;
-            default:
-                throw new Exception("option error");
-        }
-        return res;
     }
 }

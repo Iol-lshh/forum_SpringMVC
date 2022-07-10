@@ -8,12 +8,9 @@ import java.util.List;
 
 public interface ArticleRepositoryCustom {
     //save new Article
-    String saveByArticleDto(ArticleDto articleDto);
+    Article saveNewByArticleDto(ArticleDto articleDto);
 
-    List<Article> findListByPagination(int startIdx, int count);
+    List<Article> getListByPagination(int startIdx, int count);
 
-    String deleteByArticleId(Long articleId);
-
-    Long updateLikeCnt(String option, Long articleId) throws Exception;
-
+    String deleteSoft(Article article);
 }

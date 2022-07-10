@@ -27,6 +27,7 @@ class MemberServiceTest {
 
     @Test
     void setNewMemberSuccess() throws Exception {
+        //#given
         //test case
         MemberDto memberDto = MemberDto.builder()
                 .accountId("tester2")
@@ -43,14 +44,17 @@ class MemberServiceTest {
                 .build();
         given(memberRepository.saveNewByDto(memberDto)).willReturn(mockMember);
 
-        //test
+        //#test
+        //when
         MemberDto resMemberDto = memberService.setNewMember(memberDto);
+        //then
         assertNotNull(resMemberDto);
         verify(memberRepository).saveNewByDto(memberDto);
     }
 
     @Test
     void findMemberSuccess() throws Exception {
+        //#given
         //test case
         String accountId = "tester";
 
@@ -64,8 +68,10 @@ class MemberServiceTest {
                 .build();
         given(memberRepository.getReferenceByAccountId(accountId)).willReturn(mockMember);
 
-        //test
+        //#test
+        //when
         MemberDto resMemberDto = memberService.findMember(accountId);
+        //given
         assertEquals(resMemberDto.getAccountId(), accountId);
     }
 }

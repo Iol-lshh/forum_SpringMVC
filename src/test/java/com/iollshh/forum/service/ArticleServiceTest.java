@@ -15,6 +15,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,6 +35,7 @@ class ArticleServiceTest {
 
     @Test
     void uploadNewArticleSuccess() throws Exception {
+        //#given
         //test case
         ArticleDto requestDto = ArticleDto.builder()
                 .writerId("tester")
@@ -57,17 +59,19 @@ class ArticleServiceTest {
                 .lastUpdate(null)
                 .likeCount(0)
                 .build();
-        given(articleRepository.saveByArticleDto(requestDto)).willReturn("success");
-        given(articleRepository.getReferenceById(requestDto.getArticleId())).willReturn(newArticle);
+        given(articleRepository.saveNewByArticleDto(requestDto)).willReturn(newArticle);
 
-        //test
+        //#test
+        //when
         ArticleDto resArticleDto = articleService.uploadNewArticle(requestDto);
+        //then
         assertNotNull(resArticleDto);
-        verify(articleRepository).saveByArticleDto(requestDto);
+        verify(articleRepository).saveNewByArticleDto(requestDto);
     }
 
     @Test
     void getArticleSuccess() throws Exception {
+        //#given
         //test case
         Long articleId = 1l;
         String memberAccountId = "tester";
@@ -83,14 +87,17 @@ class ArticleServiceTest {
                 .build();
         given(articleRepository.getReferenceById(articleId)).willReturn(mockArticle);
 
-        //test
+        //#test
+        //when
         ArticleDto resArticleDto = articleService.getArticle(articleId, memberAccountId);
+        //then
         assertNotNull(resArticleDto);
         verify(articleRepository).getReferenceById(articleId);
     }
 
     @Test
     void getArticleListSuccess() throws Exception {
+        //#given
         //test case
         int startIdx=0;
         int count = 1;
@@ -107,16 +114,19 @@ class ArticleServiceTest {
                 .build();
         List<Article> list = new ArrayList<>();
         list.add(mockArticle);
-        given(articleRepository.findListByPagination(startIdx, count)).willReturn(list);
+        given(articleRepository.getListByPagination(startIdx, count)).willReturn(list);
 
-        //test
+        //#test
+        //when
         ListDto resListDto = articleService.getArticleList(startIdx, count, memberAccountId);
+        //then
         assertNotNull(resListDto);
-        verify(articleRepository).findListByPagination(startIdx, count);
+        verify(articleRepository).getListByPagination(startIdx, count);
     }
 
     @Test
     void deleteArticleSuccess() throws Exception {
+        //#given
         //test case
         Long articleId = 1l;
         String memberAccountId = "tester";
@@ -131,14 +141,17 @@ class ArticleServiceTest {
                 .likeCount(0)
                 .build();
         given(articleRepository.getReferenceById(articleId)).willReturn(mockArticle);
-        //test
+        //#test
+        //when
         String res = articleService.deleteArticle(articleId, memberAccountId);
+        //then
         assertNotNull(res);
-        verify(articleRepository).deleteById(articleId);
+        verify(articleRepository).deleteSoft(mockArticle);
     }
 
     @Test
     void updateArticleSuccess() throws Exception {
+        //#given
         //test case
         ArticleDto articleDto = ArticleDto.builder()
                 .articleId(1l)
@@ -151,13 +164,14 @@ class ArticleServiceTest {
         Member mockMember = Member.builder()
                 .accountId("tester")
                 .build();
+        Date mockDate = new Date();
         Article mockArticle = Article.builder()
                 .id(1l)
                 .member(mockMember)
                 .title("test Article")
                 .content("this is mock Article")
-                .regdate(null)
-                .lastUpdate(null)
+                .regdate(mockDate)
+                .lastUpdate(mockDate)
                 .likeCount(0)
                 .build();
         given(memberRepository.getReferenceByAccountId(memberAccountId)).willReturn(mockMember);
@@ -168,13 +182,16 @@ class ArticleServiceTest {
                 .title(articleDto.getTitle())
                 .content(articleDto.getContent())
                 .regdate(mockArticle.getRegdate())
-                .lastUpdate(null)
+                .lastUpdate(new Date())
                 .likeCount(0)
                 .build();
-        given(articleRepository.saveByArticleDto(articleDto)).willReturn("success");
-        //test
+        given(articleRepository.save(mockArticle)).willReturn(resArticle);
+
+        //#test
+        //when
         String res = articleService.updateArticle(articleDto,memberAccountId);
+        //then
         assertNotNull(res);
-        verify(articleRepository).saveByArticleDto(articleDto);
+        verify(articleRepository).save(mockArticle);
     }
 }
