@@ -108,6 +108,7 @@ class ArticleLikeRepositoryTest {
         Article testArticle = articleRepository.saveNewByArticleDto(articleDto);
         Long testArticleId = testArticle.getId();
         String testMemberAccountId = memberDto.getAccountId();
+        articleLikeRepository.saveByLikeInform(testMember,testArticle);
         //#test
         //when
         boolean res = articleLikeRepository.existsByInform(testMemberAccountId, testArticleId);
@@ -139,6 +140,7 @@ class ArticleLikeRepositoryTest {
         Article testArticle = articleRepository.saveNewByArticleDto(articleDto);
         Long testArticleId = testArticle.getId();
         String testMemberAccountId = memberDto.getAccountId();
+        articleLikeRepository.saveByLikeInform(testMember,testArticle);
         //#test
         //when
         ArticleLike res = articleLikeRepository.getByInform(testMemberAccountId, testArticleId);

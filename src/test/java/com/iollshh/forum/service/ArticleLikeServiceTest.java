@@ -14,16 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,7 +75,6 @@ class ArticleLikeServiceTest {
         given(memberRepository.getReferenceByAccountId(memberAccountId)).willReturn(mockMember);
         given(articleRepository.getReferenceById(articleId)).willReturn(mockArticle);
         given(articleLikeRepository.saveByLikeInform(mockMember,mockArticle)).willReturn(resArticleLike);
-        given(articleRepository.save(mockArticle2)).willReturn(mockArticle2);
 
         //#test
         //when
@@ -131,7 +126,6 @@ class ArticleLikeServiceTest {
         given(memberRepository.getReferenceByAccountId(memberAccountId)).willReturn(mockMember);
         given(articleRepository.getReferenceById(articleId)).willReturn(mockArticle);
         given(articleLikeRepository.getByInform(memberAccountId,articleId)).willReturn(resArticleLike);
-        given(articleRepository.save(mockArticle2)).willReturn(mockArticle2);
         //#test
         //when
         String res = articleLikeService.deleteLike(memberAccountId, articleId);
