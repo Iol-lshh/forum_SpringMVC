@@ -14,16 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +37,7 @@ class ArticleLikeServiceTest {
 
     @Test
     void createLikeSuccess() throws Exception {
+        //#given
         //test case
         String memberAccountId = "tester";
         Long articleId = 1l;
@@ -78,9 +75,11 @@ class ArticleLikeServiceTest {
         given(memberRepository.getReferenceByAccountId(memberAccountId)).willReturn(mockMember);
         given(articleRepository.getReferenceById(articleId)).willReturn(mockArticle);
         given(articleLikeRepository.saveByLikeInform(mockMember,mockArticle)).willReturn(resArticleLike);
-        given(articleRepository.updateLikeCnt("+", articleId)).willReturn(1l);
-        //test
+
+        //#test
+        //when
         String res = articleLikeService.createLike(memberAccountId, articleId);
+        //then
         assertNotNull(res);
         assertEquals(res,"success");
         verify(articleLikeRepository).saveByLikeInform(mockMember, mockArticle);
@@ -88,6 +87,7 @@ class ArticleLikeServiceTest {
 
     @Test
     void deleteLikeSuccess() throws Exception {
+        //#given
         //test case
         String memberAccountId = "tester";
         Long articleId = 1l;
@@ -123,17 +123,21 @@ class ArticleLikeServiceTest {
                 .build();
         //mock
         given(articleLikeRepository.existsByInform(memberAccountId, articleId)).willReturn(true);
-        given(articleLikeRepository.deleteByLikeInform(memberAccountId,articleId)).willReturn("success");
-        given(articleRepository.updateLikeCnt("-",articleId)).willReturn(1l);
-        //test
+        given(memberRepository.getReferenceByAccountId(memberAccountId)).willReturn(mockMember);
+        given(articleRepository.getReferenceById(articleId)).willReturn(mockArticle);
+        given(articleLikeRepository.getByInform(memberAccountId,articleId)).willReturn(resArticleLike);
+        //#test
+        //when
         String res = articleLikeService.deleteLike(memberAccountId, articleId);
+        //then
         assertNotNull(res);
         assertEquals(res,"success");
-        verify(articleLikeRepository).deleteByLikeInform(memberAccountId, articleId);
+        verify(articleLikeRepository).delete(resArticleLike);
     }
 
     @Test
-    void getListByArticleId() throws Exception {
+    void getListByArticleIdSuccess() throws Exception {
+        //#given
         //test case
         Long articleId = 1l;
         //mock
@@ -159,11 +163,13 @@ class ArticleLikeServiceTest {
                 .build();
         List<ArticleLike> list = new ArrayList<>();
         list.add(resArticleLike);
-        given(articleLikeRepository.findListByArticleId(articleId)).willReturn(list);
+        given(articleLikeRepository.getListByArticleId(articleId)).willReturn(list);
 
-        //test
+        //#test
+        //when
         ListDto resListDto = articleLikeService.getListByArticleId(articleId);
+        //then
         assertNotNull(resListDto);
-        verify(articleLikeRepository).findListByArticleId(articleId);
+        verify(articleLikeRepository).getListByArticleId(articleId);
     }
 }

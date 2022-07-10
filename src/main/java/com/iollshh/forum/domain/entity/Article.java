@@ -1,9 +1,6 @@
 package com.iollshh.forum.domain.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.persistence.Entity;
@@ -11,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Setter
 @Getter
 @NoArgsConstructor
 @Entity
@@ -57,4 +55,5 @@ public class Article {
         this.deldate = deldate;
         this.likeCount = likeCount;
     }
+
 }

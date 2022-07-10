@@ -40,6 +40,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .build();
 
         em.persist(newMember);
+        em.flush();
 
         return newMember;
     }

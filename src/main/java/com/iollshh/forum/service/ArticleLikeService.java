@@ -41,19 +41,17 @@ public class ArticleLikeService implements BusinessLogic{
         if(articleLikeRepository.existsByInform(memberAccountId, articleId)){
             return "이미 좋아합니다.";
         }
-
         Member member = memberRepository.getReferenceByAccountId(memberAccountId);
         if (member == null || member.getAccountId() == null) {
             return "no member";
         }
-
         Article article = articleRepository.getReferenceById(articleId);
         if (article == null || article.getId() == null) {
             return "no article";
         }
-
+        article.setLikeCount(article.getLikeCount()+1);
+        articleRepository.save(article);
         articleLikeRepository.saveByLikeInform(member, article);
-        articleRepository.updateLikeCnt("+", articleId);
 
         return "success";
     }
@@ -65,8 +63,18 @@ public class ArticleLikeService implements BusinessLogic{
         if(!articleLikeRepository.existsByInform(memberAccountId, articleId)){
             return "이미 좋아하지 않습니다.";
         }
-        articleLikeRepository.deleteByLikeInform(memberAccountId, articleId);
-        articleRepository.updateLikeCnt("-", articleId);
+        Member member = memberRepository.getReferenceByAccountId(memberAccountId);
+        if (member == null || member.getAccountId() == null) {
+            return "no member";
+        }
+        Article article = articleRepository.getReferenceById(articleId);
+        if (article == null || article.getId() == null) {
+            return "no article";
+        }
+        article.setLikeCount(article.getLikeCount()-1);
+        articleRepository.save(article);
+        ArticleLike articleLike = articleLikeRepository.getByInform(memberAccountId,articleId);
+        articleLikeRepository.delete(articleLike);
 
         return "success";
     }
@@ -77,7 +85,7 @@ public class ArticleLikeService implements BusinessLogic{
 
         ListDto listDto;
 
-        List<ArticleLike> articleLikeList = articleLikeRepository.findListByArticleId(articleId);
+        List<ArticleLike> articleLikeList = articleLikeRepository.getListByArticleId(articleId);
         List<Dto> list = articleLikeList.stream().map(e->articleLikeFactory.makeDtoByEntity(e)).collect(Collectors.toList());
         listDto = new ListDto(list);
 
